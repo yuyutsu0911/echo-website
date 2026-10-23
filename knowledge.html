@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>生命的回響 · 死亡與喪葬文化知識測驗 (單一離線版)</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: #121212;
+      color: #F5F5F5;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans TC", "PingFang TC", sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      selection-background-color: #333333;
+    }
+    ::selection { background: #333333; color: #ffffff; }
+    a, button { cursor: pointer; border: none; outline: none; }
+
+    /* Header */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: rgba(18, 18, 18, 0.95);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid #262626;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      letter-spacing: 2px;
+      color: #F5F5F5;
+      font-family: Georgia, serif;
+      background: none;
+    }
+    .brand-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #A0A0A0;
+    }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .audio-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: 1px solid #333333;
+      background: #1E1E1E;
+      color: #F5F5F5;
+      font-size: 12px;
+      transition: all 0.2s;
+    }
+    .audio-btn:hover { border-color: #555555; }
+
+    /* Main Container */
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 16px;
+      position: relative;
+    }
+    .container {
+      max-width: 720px;
+      width: 100%;
+      margin: 0 auto;
+      position: relative;
+      z-index: 10;
+    }
+
+    /* Ambient Canvas */
+    #ambientCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.85;
+    }
+
+    /* Start Screen */
+    .hero-kicker {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #A0A0A0;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+    .hero-title {
+      font-size: clamp(26px, 5vw, 42px);
+      font-weight: 400;
+      color: #F5F5F5;
+      text-align: center;
+      line-height: 1.35;
+      font-family: Georgia, serif;
+      margin-bottom: 16px;
+    }
+    .hero-desc {
+      font-size: 14px;
+      color: #A0A0A0;
+      text-align: center;
+      line-height: 1.8;
+      max-width: 540px;
+      margin: 0 auto 32px auto;
+    }
+
+    /* Candle Quote & Breathing */
+    .quote-box {
+      position: relative;
+      margin: 0 auto 32px auto;
+      max-width: 520px;
+    }
+    .candle-glow {
+      position: absolute;
+      inset: -16px;
+      border-radius: 16px;
+      background: radial-gradient(ellipse at center, rgba(255, 242, 215, 0.18) 0%, rgba(255, 215, 160, 0.05) 50%, transparent 75%);
+      pointer-events: none;
+      animation: candleBreathe 6.5s ease-in-out infinite;
+    }
+    @keyframes candleBreathe {
+      0%, 100% { opacity: 0.2; transform: scale(0.96); }
+      50% { opacity: 0.38; transform: scale(1.05); }
+    }
+    .quote-content {
+      position: relative;
+      background: rgba(30, 30, 30, 0.85);
+      border: 1px solid #2E2E2E;
+      border-radius: 8px;
+      padding: 18px 24px;
+      backdrop-filter: blur(8px);
+      text-align: left;
+    }
+    .quote-text {
+      font-family: Georgia, serif;
+      font-style: italic;
+      font-size: 14px;
+      color: #E5E5E5;
+      line-height: 1.8;
+      margin-bottom: 6px;
+    }
+    .quote-author {
+      font-size: 11px;
+      color: #888888;
+      text-align: right;
+    }
+
+    /* Pillars */
+    .pillars-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+    .pillar-card {
+      background: rgba(24, 24, 24, 0.8);
+      border: 1px solid #262626;
+      border-radius: 8px;
+      padding: 16px;
+      text-align: left;
+      transition: all 0.3s;
+    }
+    .pillar-card:hover {
+      border-color: #666666;
+      transform: translateY(-4px);
+      background: #202020;
+      box-shadow: 0 0 20px rgba(255,255,255,0.05);
+    }
+    .pillar-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: #F5F5F5;
+      margin-bottom: 6px;
+    }
+    .pillar-desc {
+      font-size: 11px;
+      color: #8C8C8C;
+      line-height: 1.6;
+    }
+
+    /* Buttons */
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+    }
+    .primary-btn {
+      background: #F5F5F5;
+      color: #121212;
+      padding: 12px 28px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      transition: all 0.2s;
+    }
+    .primary-btn:hover { background: #FFFFFF; transform: scale(1.02); }
+    .secondary-btn {
+      background: #1E1E1E;
+      color: #A0A0A0;
+      border: 1px solid #333333;
+      padding: 12px 20px;
+      border-radius: 6px;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+    .secondary-btn:hover { border-color: #555555; color: #F5F5F5; }
+
+    /* Quiz Screen */
+    .progress-wrap {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: #A0A0A0;
+      margin-bottom: 8px;
+    }
+    .progress-bar-track {
+      width: 100%;
+      height: 4px;
+      background: #262626;
+      border-radius: 2px;
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: #F5F5F5;
+      transition: width 0.3s;
+    }
+    .quiz-card {
+      background: #1E1E1E;
+      border: 1px solid #2E2E2E;
+      border-radius: 12px;
+      padding: 32px 24px;
+      box-shadow: 0 16px 36px rgba(0,0,0,0.4);
+    }
+    .q-meta {
+      font-size: 11px;
+      color: #A0A0A0;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+    }
+    .q-title {
+      font-size: 20px;
+      font-weight: 400;
+      font-family: Georgia, serif;
+      line-height: 1.6;
+      color: #F5F5F5;
+      margin-bottom: 24px;
+    }
+    .opt-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .opt-btn {
+      background: #181818;
+      border: 1px solid #333333;
+      border-radius: 8px;
+      padding: 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      text-align: left;
+      color: #E0E0E0;
+      font-size: 14px;
+      line-height: 1.6;
+      transition: all 0.2s;
+    }
+    .opt-btn:hover:not(:disabled) {
+      border-color: #555555;
+      background: #222222;
+      color: #FFFFFF;
+    }
+    .opt-key {
+      background: #262626;
+      border: 1px solid #3A3A3A;
+      color: #A0A0A0;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-family: monospace;
+      flex-shrink: 0;
+    }
+    .opt-correct {
+      background: rgba(16, 185, 129, 0.12) !important;
+      border-color: #059669 !important;
+      color: #FFFFFF !important;
+    }
+    .opt-wrong {
+      background: rgba(244, 63, 94, 0.12) !important;
+      border-color: #e11d48 !important;
+      color: #D4D4D4 !important;
+    }
+    .opt-selected-any {
+      background: #282828 !important;
+      border-color: #888888 !important;
+      color: #FFFFFF !important;
+    }
+
+    /* Explanation */
+    .exp-box {
+      background: #141414;
+      border: 1px solid #2B2B2B;
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 16px;
+    }
+    .exp-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: #E0E0E0;
+      margin-bottom: 6px;
+    }
+    .exp-desc {
+      font-size: 13px;
+      color: #B3B3B3;
+      line-height: 1.7;
+    }
+
+    /* Custom Textarea for Q10 */
+    .custom-input-box {
+      margin-top: 16px;
+      background: #141414;
+      border: 1px solid #3A3A3A;
+      border-radius: 8px;
+      padding: 16px;
+    }
+    .custom-textarea {
+      width: 100%;
+      background: #121212;
+      border: 1px solid #333333;
+      border-radius: 6px;
+      color: #F5F5F5;
+      padding: 10px;
+      font-size: 13px;
+      resize: vertical;
+      min-height: 70px;
+      margin-bottom: 8px;
+      outline: none;
+    }
+    .custom-textarea:focus { border-color: #777777; }
+
+    /* Results */
+    .score-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .score-card {
+      background: #161616;
+      border: 1px solid #262626;
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+    }
+    .score-num {
+      font-size: 32px;
+      font-family: Georgia, serif;
+      color: #F5F5F5;
+      margin-top: 4px;
+    }
+    .echo-box {
+      background: linear-gradient(90deg, #161616, #1A1A1A);
+      border: 1px solid #333333;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 24px 0;
+    }
+    .echo-quote {
+      font-family: Georgia, serif;
+      font-size: 18px;
+      color: #FFFFFF;
+      margin: 12px 0;
+      padding: 12px;
+      background: #121212;
+      border-radius: 6px;
+      border-left: 3px solid #666666;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(4px);
+      z-index: 99;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .modal-content {
+      background: #1E1E1E;
+      border: 1px solid #333333;
+      border-radius: 12px;
+      max-width: 600px;
+      width: 100%;
+      max-height: 85vh;
+      overflow-y: auto;
+      padding: 24px;
+      position: relative;
+    }
+    .modal-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: none;
+      color: #888888;
+      font-size: 20px;
+      cursor: pointer;
+    }
+    .modal-close:hover { color: #FFFFFF; }
+
+    footer {
+      border-top: 1px solid #1F1F1F;
+      padding: 16px;
+      font-size: 11px;
+      color: #666666;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <span class="brand-dot"></span>
+      <span>生命的回響</span>
+      <span style="font-size: 11px; color: #737373; font-family: sans-serif; letter-spacing: 0;">· 死亡與喪葬文化知識</span>
+    </div>
+    <div class="header-actions">
+      <button id="aboutTopBtn" class="secondary-btn" style="padding: 6px 12px; font-size: 12px;">自然葬百科</button>
+      <button id="audioToggleBtn" class="audio-btn">
+        <span>🔇</span>
+        <span>音樂：關</span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <canvas id="ambientCanvas"></canvas>
+
+    <div class="container" id="appRoot">
+      <!-- Dynamic View Mounted Here -->
+    </div>
+  </main>
+
+  <!-- Modal -->
+  <div id="aboutModal" class="modal-overlay">
+    <div class="modal-content">
+      <button class="modal-close" id="modalCloseBtn">&times;</button>
+      <div style="font-size: 11px; letter-spacing: 2px; color: #888888; text-transform: uppercase; margin-bottom: 6px;">ESSENTIAL KNOWLEDGE</div>
+      <h2 style="font-family: Georgia, serif; font-size: 20px; font-weight: 400; color: #F5F5F5; margin-bottom: 16px;">自然葬小百科 · 回歸大地的溫柔告別</h2>
+      <p style="font-size: 13px; color: #A0A0A0; line-height: 1.8; margin-bottom: 16px;">
+        「自然葬」是指遺體火化後，將骨灰經研磨處理，以不立碑、不造墳、不留記號的方式，回歸大地環境的安葬型態。秉持「節葬、簡葬、環保」與「源於自然，歸於塵土」的永續哲思。
+      </p>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px;">
+        <div style="background: #161616; border: 1px solid #2B2B2B; padding: 12px; border-radius: 6px;">
+          <div style="font-size: 12px; font-weight: 500; color: #FFF; margin-bottom: 4px;">灑葬（散葬）</div>
+          <div style="font-size: 11px; color: #888; line-height: 1.5;">依規定均勻灑放在指定專案區域或特定草坪花圃中，回歸自然。</div>
+        </div>
+        <div style="background: #161616; border: 1px solid #2B2B2B; padding: 12px; border-radius: 6px;">
+          <div style="font-size: 12px; font-weight: 500; color: #FFF; margin-bottom: 4px;">樹葬與花葬</div>
+          <div style="font-size: 11px; color: #888; line-height: 1.5;">在大樹根部周圍或花叢間掘穴植存，讓生命化作滋養草木的養分。</div>
+        </div>
+        <div style="background: #161616; border: 1px solid #2B2B2B; padding: 12px; border-radius: 6px;">
+          <div style="font-size: 12px; font-weight: 500; color: #FFF; margin-bottom: 4px;">海葬</div>
+          <div style="font-size: 11px; color: #888; line-height: 1.5;">出海至合法海域將骨灰置入環保可分解容器後投海，象徵融入汪洋。</div>
+        </div>
+        <div style="background: #161616; border: 1px solid #2B2B2B; padding: 12px; border-radius: 6px;">
+          <div style="font-size: 12px; font-weight: 500; color: #FFF; margin-bottom: 4px;">法規與專區規範</div>
+          <div style="font-size: 11px; color: #888; line-height: 1.5;">嚴禁在私人社區或非指定公園隨意灑放，必須依法向主管機關申請。</div>
+        </div>
+      </div>
+      <div style="background: #141414; border: 1px solid #282828; padding: 14px; border-radius: 6px; font-size: 12px; color: #999; line-height: 1.7; margin-bottom: 16px;">
+        <strong style="color: #DDD;">如何悼念與陪伴？</strong><br/>
+        沒有墓碑並不代表遺忘。現代人可以透過家庭聚會、照片翻閱、在特別的日子分享彼此記憶的故事。面對悲傷的親友，誠摯的陪伴與不批判的傾聽，往往是最好的支持。
+      </div>
+      <div style="text-align: right;">
+        <button id="modalOkBtn" class="primary-btn" style="padding: 8px 18px; font-size: 12px;">明白，關閉</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    生命的回響 · 死亡與喪葬文化知識測驗 · 單一檔案離線版 · 讓思念如風長存
+  </footer>
+
+  <script>
+    const QUESTIONS = [{"id":1,"question":"你知道什麼是灑葬嗎？","options":[{"key":"A","text":"把火化後的骨灰依規定灑放在指定的地方"},{"key":"B","text":"把骨灰埋在家裡的花盆"},{"key":"C","text":"把骨灰放進玩具箱"}],"correctAnswer":"A","explanationType":"小知識","explanation":"灑葬是一種讓逝者以不同方式回歸自然的安葬方式。"},{"id":2,"question":"你知道灑葬為什麼被稱為自然葬嗎？","options":[{"key":"A","text":"因為可以依規定讓骨灰以灑放的方式回歸自然"},{"key":"B","text":"因為要把骨灰種進花盆裡"},{"key":"C","text":"因為一定要把骨灰放在樹上"}],"correctAnswer":"A","explanationType":"解說","explanation":"灑葬是自然葬的一種，透過不同於傳統墓葬的方式，讓生命以另一種形式告別。"},{"id":3,"question":"你覺得灑葬和哪一個有關係？","options":[{"key":"A","text":"回歸自然"},{"key":"B","text":"太空旅行"},{"key":"C","text":"玩電動遊戲"}],"correctAnswer":"A","explanationType":"小知識","explanation":"灑葬屬於自然葬的一種，讓告別生命有不同的選擇。"},{"id":4,"question":"為什麼有些人會選擇灑葬？","options":[{"key":"A","text":"希望用不同的方式回歸自然"},{"key":"B","text":"因為這樣就不用遵守任何規定"},{"key":"C","text":"因為以後不能再想念家人"}],"correctAnswer":"A","explanationType":"小知識","explanation":"每個家庭的想法不同，有些人會選擇自然葬來告別親人。"},{"id":5,"question":"你可以在家附近的公園隨意灑放骨灰嗎？","options":[{"key":"A","text":"可以，喜歡哪裡就去哪裡"},{"key":"B","text":"不可以，要依規定到指定的地方"},{"key":"C","text":"只要沒有人看到就可以"}],"correctAnswer":"B","explanationType":"小知識","explanation":"灑葬需要遵守相關規定，不能隨意選擇地點。"},{"id":6,"question":"如果很想念一個人，你可以怎麼做？","options":[{"key":"A","text":"想想以前一起度過的快樂時光"},{"key":"B","text":"強迫自己不可以想他"},{"key":"C","text":"把所有回憶都忘掉"}],"correctAnswer":"A","explanationType":"小知識","explanation":"回憶可以幫助我們記得重要的人。"},{"id":7,"question":"如果沒有墓碑，還可以記得一個人嗎？","options":[{"key":"A","text":"不可以，沒有墓碑就會忘記"},{"key":"B","text":"可以，我們還是能記得和他的故事"},{"key":"C","text":"只有生日才能想起他"}],"correctAnswer":"B","explanationType":"小知識","explanation":"紀念一個人的方式有很多種，不一定只有墓碑。"},{"id":8,"question":"如果朋友因為想念家人而難過，你會怎麼做？","options":[{"key":"A","text":"笑他怎麼還在難過"},{"key":"B","text":"叫他不准再想"},{"key":"C","text":"陪陪他，聽他說說話"}],"correctAnswer":"C","explanationType":"小知識","explanation":"有時候，願意陪伴和聆聽就是很好的幫助。"},{"id":9,"question":"如果灑葬後沒有留下傳統墓碑，我們還能怎麼紀念逝去的人？","options":[{"key":"A","text":"只能慢慢忘記他"},{"key":"B","text":"可以透過回憶、分享故事來紀念他"},{"key":"C","text":"不能再跟別人提起他"}],"correctAnswer":"B","explanationType":"解說","explanation":"紀念一個人不一定要有墓碑，珍貴的回憶和故事，也能讓思念繼續延續。"},{"id":10,"question":"如果你可以留下一句話，你最想說什麼？","options":[{"key":"A","text":"謝謝你曾經陪伴我"},{"key":"B","text":"希望大家都能好好愛護地球"},{"key":"C","text":"我想自己寫一句話！"}],"correctAnswer":"ANY","explanationType":"小知識","explanation":"這題沒有標準答案！每個人都能留下自己的想法，就像聲音消失後，仍然會有迴響。","allowCustomInput":true}];
+    const EVALUATION_TIERS = {"PERFECT":{"title":"微光常駐 · 靜水流深","summary":"你對生命的回歸與告別懷抱著溫厚而深刻的體認。自然葬不單是骨灰的一種處置方式，更是一場卸下軀殼重回山林湖海的純淨儀式。即使大地不刻碑石，思念亦在晨曦與落雨中常駐。","quote":"生如夏花之絢爛，死如秋葉之靜美。","author":"泰戈爾"},"HIGH":{"title":"溫柔理解 · 撫慰時光","summary":"你深刻體會到了告別背後的關懷與陪伴。形式上的石碑或會隨時光斑駁，但那些共同走過的路、說過的話，早已銘刻在彼此的生命底色裡，長久溫暖著前行的人。","quote":"只要還有人記得你，你就未曾真正離去。","author":"生命哲思"},"MODERATE":{"title":"初探告別 · 心的啟程","summary":"你已經開始走進自然葬與現代悼念思維的深邃世界。學習面對死亡，是為了更清醒、更珍惜地對待當下的每一次相遇與相擁。","quote":"向死而生，方能懂得珍惜眼前每寸光陰。","author":"存在主義哲思"},"CONTEMPLATIVE":{"title":"靜默沉思 · 重新體悟","summary":"告別是人類最深邃、也最需要溫柔練習的生命課題。不論儀式如何簡化或改變，最重要的永遠是那份真摯的愛與對大自然的謙卑。","quote":"死亡不是失去生命，而是走出了時間。","author":"現代哲學筆記"}};
+
+    // State
+    let viewMode = 'start'; // 'start' | 'quiz' | 'result'
+    let currentIdx = 0;
+    let userAnswers = []; // { qId, selectedKey, isCorrect, customText }
+    let isAudioPlaying = false;
+    let audioCtx = null;
+    let masterGain = null;
+    let synthTimer = null;
+
+    // Canvas Ambient Particles
+    function initParticles() {
+      const canvas = document.getElementById('ambientCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      let w = canvas.width = window.innerWidth;
+      let h = canvas.height = window.innerHeight;
+
+      window.addEventListener('resize', () => {
+        w = canvas.width = window.innerWidth;
+        h = canvas.height = window.innerHeight;
+      });
+
+      const count = 35;
+      const particles = [];
+      for (let i = 0; i < count; i++) {
+        const x = Math.random() * w;
+        particles.push({
+          x: x, initialX: x, y: Math.random() * h,
+          size: 0.8 + Math.random() * 2.2,
+          speedY: -(0.15 + Math.random() * 0.35),
+          baseOpacity: 0.08 + Math.random() * 0.25,
+          pulsePhase: Math.random() * Math.PI * 2,
+          pulseSpeed: 0.01 + Math.random() * 0.015,
+          swaySpeed: 0.008 + Math.random() * 0.01,
+          swayAmplitude: 15 + Math.random() * 25
+        });
+      }
+
+      let time = 0;
+      function render() {
+        time++;
+        ctx.clearRect(0, 0, w, h);
+        particles.forEach(p => {
+          p.pulsePhase += p.pulseSpeed;
+          const currentOpacity = p.baseOpacity + Math.sin(p.pulsePhase) * (p.baseOpacity * 0.5);
+          p.x = p.initialX + Math.sin(time * p.swaySpeed + p.pulsePhase) * p.swayAmplitude;
+          p.y += p.speedY;
+          if (p.y < -10) { p.y = h + 10; p.initialX = Math.random() * w; p.x = p.initialX; }
+
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+          ctx.fillStyle = "rgba(245, 240, 230, " + Math.max(0.02, currentOpacity) + ")";
+          ctx.shadowColor = "rgba(255, 235, 190, 0.4)";
+          ctx.shadowBlur = p.size * 3;
+          ctx.fill();
+          ctx.restore();
+        });
+        requestAnimationFrame(render);
+      }
+      render();
+    }
+
+    // Audio Engine
+    function initAudio() {
+      if (!audioCtx) {
+        const AudioClass = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioClass();
+        masterGain = audioCtx.createGain();
+        masterGain.gain.setValueAtTime(0.1, audioCtx.currentTime); // 25% * 0.4
+        masterGain.connect(audioCtx.destination);
+
+        // Warm low drone
+        [65.41, 98.0, 146.83, 174.61].forEach(freq => {
+          const osc = audioCtx.createOscillator();
+          const filter = audioCtx.createBiquadFilter();
+          const g = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+          filter.type = 'lowpass';
+          filter.frequency.setValueAtTime(320, audioCtx.currentTime);
+          g.gain.setValueAtTime(0.04, audioCtx.currentTime);
+          osc.connect(filter);
+          filter.connect(g);
+          g.connect(masterGain);
+          osc.start();
+        });
+
+        // Contemplative chimes
+        const notes = [261.63, 293.66, 329.63, 392.0, 440.0, 523.25];
+        synthTimer = setInterval(() => {
+          if (!isAudioPlaying || !audioCtx) return;
+          const note = notes[Math.floor(Math.random() * notes.length)];
+          const osc = audioCtx.createOscillator();
+          const g = audioCtx.createGain();
+          const f = audioCtx.createBiquadFilter();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(note, audioCtx.currentTime);
+          f.type = 'lowpass';
+          f.frequency.setValueAtTime(800, audioCtx.currentTime);
+          const now = audioCtx.currentTime;
+          g.gain.setValueAtTime(0.0001, now);
+          g.gain.linearRampToValueAtTime(0.035, now + 1.2);
+          g.gain.exponentialRampToValueAtTime(0.0001, now + 5.5);
+          osc.connect(f);
+          f.connect(g);
+          g.connect(masterGain);
+          osc.start(now);
+          osc.stop(now + 6);
+        }, 4500);
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      isAudioPlaying = true;
+      updateAudioBtnUI();
+    }
+
+    function toggleAudio() {
+      if (isAudioPlaying) {
+        if (audioCtx) audioCtx.suspend();
+        isAudioPlaying = false;
+      } else {
+        initAudio();
+      }
+      updateAudioBtnUI();
+    }
+
+    function updateAudioBtnUI() {
+      const btn = document.getElementById('audioToggleBtn');
+      if (!btn) return;
+      if (isAudioPlaying) {
+        btn.innerHTML = '<span>🎵</span> <span>音樂：開</span>';
+        btn.style.borderColor = '#555555';
+      } else {
+        btn.innerHTML = '<span>🔇</span> <span>音樂：關</span>';
+        btn.style.borderColor = '#333333';
+      }
+    }
+
+    // Render Views
+    function render() {
+      const root = document.getElementById('appRoot');
+      if (!root) return;
+
+      if (viewMode === 'start') {
+        root.innerHTML = `
+          <div style="text-align: center;">
+            <div class="hero-kicker">ECHOES OF MORTALITY · 生命與喪葬文化思辨</div>
+            <h1 class="hero-title">生命的告別，與大地的迴響</h1>
+            <p class="hero-desc">
+              死亡不是記憶的終結，而是生命以另一種形式重歸萬物。<br/>
+              走進自然葬的靜謐，理解回憶與陪伴如何在歲月中長存。
+            </p>
+
+            <div class="quote-box">
+              <div class="candle-glow"></div>
+              <div class="quote-content">
+                <div class="quote-text">「落葉歸根，融入土壤化為微風；沒有冰冷的石碑，心靈的故事依舊芬芳。」</div>
+                <div class="quote-author">—— 關於自然葬與生命溫度的思索</div>
+              </div>
+            </div>
+
+            <div class="pillars-grid">
+              <div class="pillar-card" onclick="openAboutModal()" style="cursor: pointer;">
+                <div class="pillar-title">🍃 自然葬概念</div>
+                <div class="pillar-desc">認識灑葬的規定、意義與生命回歸大地的莊嚴。點擊了解更多 →</div>
+              </div>
+              <div class="pillar-card" onclick="openAboutModal()" style="cursor: pointer;">
+                <div class="pillar-title">🤍 陪伴與悼念</div>
+                <div class="pillar-desc">學習如何面對思念、撫慰朋友，以故事延續記憶。點擊了解更多 →</div>
+              </div>
+              <div class="pillar-card" onclick="startQuiz()" style="cursor: pointer;">
+                <div class="pillar-title">✨ 留白與餘音</div>
+                <div class="pillar-desc">第十題開放自訂心語，留下專屬於你的真摯話語。點擊進入測驗 →</div>
+              </div>
+            </div>
+
+            <div class="btn-group">
+              <button class="primary-btn" onclick="startQuiz()">開始測驗 →</button>
+              <button class="secondary-btn" onclick="openAboutModal()">閱讀自然葬簡介</button>
+            </div>
+            <div style="font-size: 11px; color: #666; margin-top: 14px;">點擊開始測驗時將輕柔開啟背景環境音，可隨時於右上角自由切換。</div>
+          </div>
+        `;
+      } else if (viewMode === 'quiz') {
+        const q = QUESTIONS[currentIdx];
+        const existingAns = userAnswers.find(a => a.qId === q.id);
+        const isAnswered = !!existingAns;
+        const pct = Math.round(((currentIdx + 1) / QUESTIONS.length) * 100);
+
+        let optionsHtml = '';
+        q.options.forEach(opt => {
+          let btnClass = 'opt-btn';
+          let isSelected = existingAns && existingAns.selectedKey === opt.key;
+          let isCorrect = q.correctAnswer === 'ANY' ? true : q.correctAnswer === opt.key;
+
+          if (isAnswered) {
+            if (q.correctAnswer === 'ANY') {
+              if (isSelected) btnClass += ' opt-selected-any';
+            } else {
+              if (isCorrect) btnClass += ' opt-correct';
+              else if (isSelected) btnClass += ' opt-wrong';
+            }
+          }
+
+          optionsHtml += `
+            <button class="${btnClass}" onclick="handleSelectOption('${opt.key}')" ${isAnswered ? 'disabled' : ''}>
+              <span class="opt-key">${opt.key}</span>
+              <span style="flex: 1;">${opt.text}</span>
+              ${isAnswered && isCorrect ? '<span>✓</span>' : ''}
+              ${isAnswered && isSelected && !isCorrect ? '<span>✕</span>' : ''}
+            </button>
+          `;
+        });
+
+        root.innerHTML = `
+          <div>
+            <div class="progress-wrap">
+              <span>第 ${currentIdx + 1} 題 / 共 ${QUESTIONS.length} 題</span>
+              <span>${pct}% 完成</span>
+            </div>
+            <div class="progress-bar-track">
+              <div class="progress-bar-fill" style="width: ${pct}%;"></div>
+            </div>
+
+            <div class="quiz-card">
+              <div class="q-meta">QUESTION ${String(q.id).padStart(2, '0')} ${q.correctAnswer === 'ANY' ? '(開放心語 · 無標準答案)' : ''}</div>
+              <h2 class="q-title">${q.question}</h2>
+
+              <div class="opt-list">${optionsHtml}</div>
+
+              ${q.allowCustomInput && !isAnswered ? `
+                <div class="custom-input-box" id="customInputBox" style="display: none;">
+                  <div style="font-size: 12px; color: #AAA; margin-bottom: 6px;">寫下你心中最想留給世界或重要之人的一句話：</div>
+                  <textarea id="customTextInput" class="custom-textarea" placeholder="例如：謝謝你曾與我並肩看過這世間風景；願你平安自在，勇敢前行。"></textarea>
+                  <div style="text-align: right;">
+                    <button class="primary-btn" style="padding: 6px 14px; font-size: 12px;" onclick="submitCustomInput()">確認送出留白心語</button>
+                  </div>
+                </div>
+              ` : ''}
+
+              ${isAnswered ? `
+                <div class="exp-box">
+                  <div class="exp-title">【${q.explanationType}】 ${q.correctAnswer === 'ANY' ? '自由體會 · 迴響長存' : (existingAns.isCorrect ? '回答正確' : '正確答案為：' + q.correctAnswer)}</div>
+                  <div class="exp-desc">${q.explanation}</div>
+                  ${existingAns.customText ? `
+                    <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid #222; font-size: 12px; color: #CCC; font-style: italic;">
+                      你留下的心語：「${existingAns.customText}」
+                    </div>
+                  ` : ''}
+                </div>
+                <div style="text-align: right; margin-top: 20px;">
+                  <button class="primary-btn" onclick="nextQuestion()">
+                    ${currentIdx === QUESTIONS.length - 1 ? '查看測驗結算評語 →' : '下一題 →'}
+                  </button>
+                </div>
+              ` : ''}
+            </div>
+
+            <div style="margin-top: 16px; display: flex; justify-content: space-between; font-size: 12px; color: #666;">
+              <button onclick="restartQuiz()" style="background: none; color: #888;">↺ 重新測驗</button>
+              <span>靜思每一題背後的生命意義</span>
+            </div>
+          </div>
+        `;
+      } else if (viewMode === 'result') {
+        const correctCount = userAnswers.filter(a => a.isCorrect).length;
+        const total = QUESTIONS.length;
+        const rate = Math.round((correctCount / total) * 100);
+
+        let tier = EVALUATION_TIERS.CONTEMPLATIVE;
+        if (rate === 100) tier = EVALUATION_TIERS.PERFECT;
+        else if (rate >= 80) tier = EVALUATION_TIERS.HIGH;
+        else if (rate >= 60) tier = EVALUATION_TIERS.MODERATE;
+
+        const q10Ans = userAnswers.find(a => a.qId === 10);
+        const q10Opt = QUESTIONS.find(q => q.id === 10)?.options.find(o => o.key === q10Ans?.selectedKey);
+        const echoText = q10Ans?.customText || q10Opt?.text || '謝謝你曾經陪伴我。';
+
+        root.innerHTML = `
+          <div>
+            <div style="text-align: center; margin-bottom: 24px;">
+              <div class="hero-kicker">QUIZ COMPLETION · 結算與生命沉思</div>
+              <h1 class="hero-title">生命的回響與告別</h1>
+            </div>
+
+            <div class="quiz-card">
+              <div class="score-grid">
+                <div class="score-card">
+                  <span style="font-size: 11px; color: #888;">測驗總得分</span>
+                  <div class="score-num">${correctCount * 10} <span style="font-size: 14px; color: #666;">/ 100</span></div>
+                </div>
+                <div class="score-card">
+                  <span style="font-size: 11px; color: #888;">答對率</span>
+                  <div class="score-num">${rate}%</div>
+                </div>
+                <div class="score-card">
+                  <span style="font-size: 11px; color: #888;">生命理解境界</span>
+                  <div style="font-size: 16px; font-family: Georgia, serif; color: #E0E0E0; margin-top: 10px;">${tier.title}</div>
+                </div>
+              </div>
+
+              <div style="margin-bottom: 24px;">
+                <div style="font-size: 12px; color: #AAA; margin-bottom: 8px;">結語評語 · ${tier.title}</div>
+                <p style="font-size: 14px; color: #CCC; line-height: 1.8; margin-bottom: 16px;">${tier.summary}</p>
+                <div style="background: #141414; border-left: 2px solid #555; padding: 12px 16px; font-style: italic; font-size: 13px; color: #DDD;">
+                  「${tier.quote}」 <span style="font-size: 11px; color: #777; font-style: normal; float: right;">—— ${tier.author}</span>
+                </div>
+              </div>
+
+              <div class="echo-box">
+                <div style="display: flex; justify-content: space-between; font-size: 12px; color: #AAA;">
+                  <span>你在第 10 題留下的生命心語</span>
+                  <span>微光共鳴</span>
+                </div>
+                <div class="echo-quote">「${echoText}」</div>
+                <p style="font-size: 11px; color: #888;">就像聲音消失在群山之間，震動卻永遠留在空氣裡。只要心裡有愛，回憶便不會褪色。</p>
+              </div>
+
+              <div class="btn-group" style="justify-content: space-between; border-top: 1px solid #262626; padding-top: 20px;">
+                <div style="display: flex; gap: 10px;">
+                  <button class="primary-btn" onclick="restartQuiz()">↺ 重新挑戰</button>
+                  <button class="secondary-btn" onclick="goHome()">返回首頁</button>
+                </div>
+                <button class="secondary-btn" onclick="copyNote('${correctCount * 10}', '${rate}', '${tier.title}', '${echoText}')">複製感思筆記</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    // Handlers
+    window.startQuiz = function() {
+      initAudio();
+      viewMode = 'quiz';
+      currentIdx = 0;
+      userAnswers = [];
+      render();
+    };
+
+    window.restartQuiz = function() {
+      viewMode = 'quiz';
+      currentIdx = 0;
+      userAnswers = [];
+      render();
+    };
+
+    window.goHome = function() {
+      viewMode = 'start';
+      render();
+    };
+
+    window.handleSelectOption = function(key) {
+      const q = QUESTIONS[currentIdx];
+      if (q.allowCustomInput && key === 'C') {
+        const box = document.getElementById('customInputBox');
+        if (box) {
+          box.style.display = 'block';
+          document.getElementById('customTextInput')?.focus();
+        }
+        return;
+      }
+      recordAnswer(key);
+    };
+
+    window.submitCustomInput = function() {
+      const input = document.getElementById('customTextInput');
+      const text = input ? input.value.trim() : '';
+      recordAnswer('C', text || '謝謝所有的相遇，請帶著我的微笑好好生活。');
+    };
+
+    function recordAnswer(key, customText) {
+      const q = QUESTIONS[currentIdx];
+      const isCorrect = q.correctAnswer === 'ANY' ? true : q.correctAnswer === key;
+      userAnswers = userAnswers.filter(a => a.qId !== q.id);
+      userAnswers.push({ qId: q.id, selectedKey: key, isCorrect, customText });
+      render();
+    }
+
+    window.nextQuestion = function() {
+      if (currentIdx < QUESTIONS.length - 1) {
+        currentIdx++;
+        render();
+      } else {
+        viewMode = 'result';
+        render();
+      }
+    };
+
+    window.copyNote = function(score, rate, title, echo) {
+      const text = "【生命的回響 · 死亡與喪葬文化知識測驗】\n得分：" + score + " 分（答對率 " + rate + "%）\n結語：" + title + "\n留白心語：「" + echo + "」\n—— 願落葉歸根，思念如微風長存。";
+      navigator.clipboard.writeText(text).then(() => {
+        alert("已成功複製感思筆記到剪貼簿！");
+      }).catch(() => {
+        alert("複製成功！");
+      });
+    };
+
+    window.openAboutModal = function() {
+      document.getElementById('aboutModal').style.display = 'flex';
+    };
+
+    window.closeAboutModal = function() {
+      document.getElementById('aboutModal').style.display = 'none';
+    };
+
+    // Modal Events
+    document.getElementById('aboutTopBtn').onclick = openAboutModal;
+    document.getElementById('modalCloseBtn').onclick = closeAboutModal;
+    document.getElementById('modalOkBtn').onclick = closeAboutModal;
+    document.getElementById('audioToggleBtn').onclick = toggleAudio;
+
+    // Start
+    initParticles();
+    render();
+  </script>
+</body>
+</html>
