@@ -1,0 +1,1528 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>記憶燈塔：迴光返照的迷宮 (Memory Labyrinth)</title>
+  <meta name="description" content="日系極簡與溫暖手繪風的微型立體網格解謎遊戲。在生命光芒漸暗前，串聯重要人生碎片，點亮記憶燈塔。">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600&family=Zen+Old+Mincho:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      background-color: #12161A;
+      color: #F3D5A0;
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      touch-action: manipulation;
+    }
+
+    .font-mincho {
+      font-family: 'Zen Old Mincho', 'Noto Serif TC', serif;
+    }
+
+    .bg-grain {
+      background-image: radial-gradient(rgba(243, 213, 160, 0.04) 1px, transparent 1px);
+      background-size: 24px 24px;
+    }
+
+    /* Screen Views */
+    .screen-view {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .screen-view.hidden {
+      display: none !important;
+    }
+
+    /* Header Top Bar */
+    header {
+      height: 56px;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(243, 213, 160, 0.12);
+      background: rgba(18, 22, 26, 0.85);
+      backdrop-filter: blur(12px);
+      z-index: 10;
+    }
+
+    .brand-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      color: #F3D5A0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Buttons */
+    .btn {
+      background: rgba(34, 42, 53, 0.8);
+      border: 1px solid rgba(243, 213, 160, 0.2);
+      color: #F3D5A0;
+      padding: 7px 16px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .btn:hover {
+      background: rgba(45, 56, 70, 0.9);
+      border-color: rgba(243, 213, 160, 0.45);
+      transform: translateY(-1px);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn-primary {
+      background: #F3D5A0;
+      border-color: #F3D5A0;
+      color: #12161A;
+      font-weight: bold;
+    }
+
+    .btn-primary:hover {
+      background: #FFF9EE;
+      color: #12161A;
+      box-shadow: 0 4px 15px rgba(243, 213, 160, 0.3);
+    }
+
+    /* Main Menu View */
+    #main-menu-view {
+      position: relative;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      overflow: hidden;
+    }
+
+    .menu-hero-card {
+      position: relative;
+      max-width: 680px;
+      width: 100%;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid rgba(243, 213, 160, 0.25);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+      background: #161C23;
+    }
+
+    .menu-hero-img-wrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 2 / 1;
+      overflow: hidden;
+    }
+
+    .menu-hero-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      transition: transform 0.8s ease;
+    }
+
+    .menu-hero-card:hover .menu-hero-img {
+      transform: scale(1.03);
+    }
+
+    .menu-hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, #12161A 0%, transparent 60%), linear-gradient(to right, rgba(18,22,26,0.6) 0%, transparent 50%, rgba(18,22,26,0.6) 100%);
+    }
+
+    .menu-tagline {
+      position: absolute;
+      bottom: 12px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-size: 0.82rem;
+      color: rgba(243, 213, 160, 0.85);
+      letter-spacing: 0.1em;
+    }
+
+    .menu-buttons {
+      margin-top: 28px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      width: 100%;
+      max-width: 600px;
+    }
+
+    .btn-menu-action {
+      padding: 12px 24px;
+      font-size: 0.92rem;
+      border-radius: 12px;
+    }
+
+    /* Game Layout Container */
+    #game-container {
+      flex: 1;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      cursor: grab;
+    }
+
+    #game-container.dragging {
+      cursor: grabbing;
+    }
+
+    /* Floating Top HUD */
+    .hud-bar {
+      position: absolute;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      padding: 8px 20px;
+      background: rgba(22, 28, 36, 0.75);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(243, 213, 160, 0.16);
+      border-radius: 24px;
+      z-index: 5;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+
+    .hud-item {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      font-size: 0.8rem;
+      color: rgba(243, 213, 160, 0.7);
+    }
+
+    .hud-val {
+      font-weight: 600;
+      font-size: 1.05rem;
+      color: #FFF9EE;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .hud-divider {
+      width: 1px;
+      height: 14px;
+      background: rgba(243, 213, 160, 0.2);
+    }
+
+    /* Canvas */
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      touch-action: none;
+    }
+
+    /* Floating Bottom Action Toolbar */
+    .toolbar-bottom {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 6px 14px;
+      background: rgba(22, 28, 36, 0.8);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(243, 213, 160, 0.18);
+      border-radius: 20px;
+      z-index: 5;
+    }
+
+    /* Floating Viewport Zoom Controls (Bottom Right) */
+    .viewport-controls {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      background: rgba(22, 28, 36, 0.8);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(243, 213, 160, 0.18);
+      border-radius: 12px;
+      z-index: 5;
+    }
+
+    .zoom-btn {
+      background: transparent;
+      border: none;
+      color: #F3D5A0;
+      cursor: pointer;
+      padding: 4px 6px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      font-weight: bold;
+    }
+
+    .zoom-btn:hover {
+      background: rgba(34, 42, 53, 0.8);
+      color: #FFF9EE;
+    }
+
+    .zoom-text {
+      font-size: 0.75rem;
+      color: rgba(243, 213, 160, 0.8);
+      min-width: 40px;
+      text-align: center;
+      font-family: monospace;
+    }
+
+    /* Navigation Hint */
+    .nav-hint {
+      position: absolute;
+      top: 76px;
+      right: 20px;
+      padding: 6px 12px;
+      background: rgba(22, 28, 36, 0.7);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(243, 213, 160, 0.14);
+      border-radius: 8px;
+      font-size: 0.75rem;
+      color: rgba(243, 213, 160, 0.7);
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    @media (max-width: 640px) {
+      .nav-hint { display: none; }
+    }
+
+    /* Poetic Story Chronicle Panel */
+    .chronicle-card {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      max-width: 300px;
+      background: rgba(22, 28, 36, 0.82);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(243, 213, 160, 0.15);
+      border-radius: 12px;
+      padding: 14px;
+      z-index: 5;
+      font-size: 0.82rem;
+      line-height: 1.6;
+      display: none;
+    }
+
+    @media (min-width: 900px) {
+      .chronicle-card {
+        display: block;
+      }
+    }
+
+    .chronicle-title {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #F3D5A0;
+      margin-bottom: 4px;
+    }
+
+    .chronicle-quote {
+      color: rgba(243, 213, 160, 0.75);
+      font-style: italic;
+    }
+
+    /* Modals */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 13, 16, 0.82);
+      backdrop-filter: blur(12px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 50;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-content {
+      background: rgba(26, 33, 42, 0.95);
+      border: 1px solid rgba(243, 213, 160, 0.3);
+      border-radius: 16px;
+      max-width: 520px;
+      width: 100%;
+      padding: 28px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+      transform: translateY(12px);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .modal-overlay.active .modal-content {
+      transform: translateY(0);
+    }
+
+    .modal-header {
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: #F3D5A0;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+
+    .modal-body {
+      font-size: 0.9rem;
+      line-height: 1.7;
+      color: rgba(243, 213, 160, 0.85);
+      margin-bottom: 24px;
+    }
+
+    .poem-box {
+      background: rgba(18, 22, 26, 0.6);
+      border: 1px solid rgba(243, 213, 160, 0.12);
+      padding: 16px;
+      border-radius: 10px;
+      margin: 16px 0;
+      text-align: center;
+      font-style: italic;
+    }
+
+    .poem-line {
+      margin: 4px 0;
+      color: #FFF9EE;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .level-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 16px;
+      max-height: 60vh;
+      overflow-y: auto;
+    }
+
+    .level-card {
+      background: rgba(34, 42, 53, 0.6);
+      border: 1px solid rgba(243, 213, 160, 0.15);
+      border-radius: 10px;
+      padding: 12px;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s;
+    }
+
+    .level-card:hover {
+      background: rgba(45, 56, 70, 0.8);
+      border-color: #F3D5A0;
+    }
+
+    .level-card.active {
+      border-color: #F3D5A0;
+      background: rgba(243, 213, 160, 0.12);
+    }
+  </style>
+</head>
+<body class="bg-grain">
+
+  <!-- ============================================== -->
+  <!-- 1. MAIN MENU SCREEN (遊戲主介面)               -->
+  <!-- ============================================== -->
+  <div id="main-menu-view" class="screen-view">
+    <div style="position: absolute; top: 16px; right: 20px; display: flex; gap: 10px; z-index: 10;">
+      <button id="btn-sound-menu" class="btn">🔊 聲音：開</button>
+    </div>
+
+    <div class="menu-hero-card">
+      <div class="menu-hero-img-wrap">
+        <img src="picture.jpg" alt="迴光返照：記憶燈塔" class="menu-hero-img" onerror="this.src='assets/aistudio/picture_448a1bde.jpg';">
+        <div class="menu-hero-overlay"></div>
+        <div class="menu-tagline font-mincho">「在生命微光漸暗前，串聯一生摯愛碎片，點亮永恆燈塔」</div>
+      </div>
+    </div>
+
+    <!-- 3 Requested Buttons on Main Menu -->
+    <div class="menu-buttons">
+      <button id="btn-menu-start" class="btn btn-primary font-mincho btn-menu-action">
+        ▶ 開始遊戲
+      </button>
+      <button id="btn-menu-story" class="btn font-mincho btn-menu-action">
+        📖 遊戲說明
+      </button>
+      <button id="btn-menu-levels" class="btn font-mincho btn-menu-action">
+        📜 章節目錄故事內容
+      </button>
+    </div>
+
+    <div style="margin-top: 24px; font-size: 0.75rem; color: rgba(243, 213, 160, 0.5); letter-spacing: 0.08em;">
+      日系極簡與溫暖手繪風微型立體網格 · Memory Labyrinth
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- 2. ACTIVE PLAYING VIEW (目前遊戲進行畫面)       -->
+  <!-- ============================================== -->
+  <div id="playing-view" class="screen-view hidden">
+    <header>
+      <div class="brand-title font-mincho">
+        <button id="btn-header-home" class="btn" style="padding: 4px 10px; font-size: 0.75rem;">
+          🏠 主選單
+        </button>
+        <div style="width: 1px; height: 16px; background: rgba(243,213,160,0.2);"></div>
+        <span>記憶燈塔：迴光返照的迷宮</span>
+      </div>
+      <div class="header-actions">
+        <button id="btn-sound-play" class="btn">🔊 聲音：開</button>
+        <button id="btn-levels" class="btn">章節目錄故事內容</button>
+        <button id="btn-story" class="btn">遊戲說明</button>
+      </div>
+    </header>
+
+    <div id="game-container">
+      <div class="hud-bar">
+        <div class="hud-item">
+          <span>章節</span>
+          <span id="hud-chapter" class="hud-val">1/6</span>
+        </div>
+        <div class="hud-divider"></div>
+        <div class="hud-item">
+          <span>剩餘心火 (步數)</span>
+          <span id="hud-energy" class="hud-val">16</span>
+        </div>
+        <div class="hud-divider"></div>
+        <div class="hud-item">
+          <span>回憶碎片</span>
+          <span id="hud-fragments" class="hud-val">0 / 2</span>
+        </div>
+      </div>
+
+      <div class="nav-hint">
+        ✦ 按住滑鼠左鍵可拖拽畫面 · 滾輪縮放視角
+      </div>
+
+      <canvas id="game-canvas"></canvas>
+
+      <div class="chronicle-card">
+        <div id="chronicle-title" class="chronicle-title font-mincho">初次學會騎車的笑聲</div>
+        <div id="chronicle-quote" class="chronicle-quote">「別放手喔，父親。」——在微風中，雙輪悄然離地。</div>
+      </div>
+
+      <div class="toolbar-bottom">
+        <button id="btn-undo" class="btn">↩ 復原一步</button>
+        <button id="btn-reset" class="btn">↺ 重新思索</button>
+      </div>
+
+      <div class="viewport-controls">
+        <button id="btn-zoom-in" class="zoom-btn" title="放大">+</button>
+        <span id="zoom-level" class="zoom-text">100%</span>
+        <button id="btn-zoom-out" class="zoom-btn" title="縮小">-</button>
+        <button id="btn-zoom-reset" class="zoom-btn" style="font-size:0.75rem; margin-left:4px;" title="重設視角至迷宮">⟲ 重設</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Victory Modal -->
+  <div id="modal-victory" class="modal-overlay">
+    <div class="modal-content">
+      <div id="vic-title" class="modal-header font-mincho">記憶重現 · 迴光返照</div>
+      <div class="modal-body">
+        <p id="vic-vignette"></p>
+        <div class="poem-box font-mincho">
+          <div id="vic-poem"></div>
+          <div id="vic-author" style="margin-top: 8px; font-size: 0.8rem; color: rgba(243,213,160,0.6);"></div>
+        </div>
+      </div>
+      <!-- Victory footer buttons: When finishing Ch 6, shows 返回主介面 and 重新遊戲 -->
+      <div id="vic-footer" class="modal-footer">
+        <!-- Dynamically rendered buttons depending on chapter -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Level Select Modal (章節目錄故事內容) -->
+  <div id="modal-levels" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header font-mincho">章節目錄故事內容 · 歲月行囊</div>
+      <div class="modal-body">
+        <div class="level-grid" id="level-list"></div>
+      </div>
+      <div class="modal-footer">
+        <button id="btn-close-levels" class="btn">關閉目錄</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Story Intro Modal (遊戲說明) -->
+  <div id="modal-intro" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header font-mincho">遊戲說明 · 引導之光心法</div>
+      <div class="modal-body">
+        <p>當生命的光芒即將歸於沉寂，意識深處會浮現由微光方塊築成的記憶迷宮。</p>
+        <br>
+        <p>• <strong>視角操作：</strong> 按住滑鼠左鍵可任意拖拽移動整個畫面；滾動滑鼠滾輪可隨時放大或縮小視角；點選右下角「重設」可隨時導航回迷宮中心。</p>
+        <p>• <strong>核心目標：</strong> 單擊相鄰方塊（或使用鍵盤方向鍵/WASD），引導微光串聯散落的人生碎片，最終點亮「記憶燈塔」。</p>
+        <p>• <strong>心火步數：</strong> 道路會隨著步數遞減逐漸暗淡，請在心火耗盡前完成無憾的串聯。</p>
+        <p>• <strong>回溯復原：</strong> 點擊已走過的前一個方塊或點擊「復原」，可隨時復原回溯並恢復心火步數。</p>
+      </div>
+      <div class="modal-footer">
+        <button id="btn-close-intro" class="btn btn-primary">領會心意，關閉說明</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- Levels Data ---
+    const LEVELS = [
+      {
+        id: 1,
+        title: "初次學會騎車的笑聲",
+        subtitle: "「別放手喔，父親。」——在微風中，雙輪悄然離地。",
+        gridSize: 5,
+        startPos: { x: 0, y: 4 },
+        lighthousePos: { x: 4, y: 0 },
+        fragments: [
+          { id: 1, x: 1, y: 2, name: "泛黃的輔助輪", icon: "bicycle" },
+          { id: 2, x: 3, y: 1, name: "後座鬆開的掌心", icon: "hand" }
+        ],
+        obstacles: [{ x: 1, y: 1 }, { x: 2, y: 3 }, { x: 3, y: 3 }],
+        maxEnergy: 16,
+        memoryScroll: {
+          vignette: "記憶深處泛著暖橙色的晨光。小小的雙手緊握著顫抖的手把，父親在身後喊：『看前方，別往下看！』不知何時，掌心的支撐悄然離去，車輪破開微風疾馳，笑聲清脆得驚飛了枝頭的麻雀。",
+          poem: [
+            "車輪碾過童年的青苔，",
+            "風灌滿了單薄的衣襬。",
+            "第一次學會平衡的瞬間，",
+            "我成了追逐光明的孩子。"
+          ],
+          author: "—— 七歲夏天的巷口記憶"
+        }
+      },
+      {
+        id: 2,
+        title: "午後紙飛機與雷陣雨",
+        subtitle: "「看誰的能飛過隔壁的紅磚牆！」——摺痕裡藏著未寄出的約定。",
+        gridSize: 6,
+        startPos: { x: 0, y: 0 },
+        lighthousePos: { x: 5, y: 5 },
+        fragments: [
+          { id: 1, x: 2, y: 1, name: "摺痕整齊的作業本", icon: "plane" },
+          { id: 2, x: 1, y: 4, name: "暴雨突降的屋簷", icon: "tea" },
+          { id: 3, x: 4, y: 3, name: "雨過天晴的彩虹", icon: "star" }
+        ],
+        obstacles: [{ x: 2, y: 2 }, { x: 3, y: 2 }, { x: 1, y: 2 }, { x: 4, y: 1 }, { x: 3, y: 4 }],
+        maxEnergy: 22,
+        memoryScroll: {
+          vignette: "悶熱的蟬鳴聲忽然靜止，豆大的雨點砸在老舊紅磚瓦上。我們躲在窄小的鐵皮簷下，看著白色紙飛機打著旋落在水窪裡。少年時期的約定總是輕率卻純真，那一刻我們以為，夏天永遠不會過完。",
+          poem: [
+            "墨水被驟雨暈開，",
+            "少年在簷下發呆。",
+            "飛向天空的白羽，",
+            "把整個青春留白。"
+          ],
+          author: "—— 十四歲屋簷下的雷雨聲"
+        }
+      },
+      {
+        id: 3,
+        title: "遠方老友泛黃的信件",
+        subtitle: "「展信舒顏，見字如面。」——穿越千里的墨香與問候。",
+        gridSize: 6,
+        startPos: { x: 5, y: 0 },
+        lighthousePos: { x: 0, y: 5 },
+        fragments: [
+          { id: 1, x: 4, y: 2, name: "綠色鐵皮郵筒", icon: "letter" },
+          { id: 2, x: 2, y: 1, name: "筆尖劃破的稿紙", icon: "book" },
+          { id: 3, x: 1, y: 3, name: "褪色的航空郵戳", icon: "plane" },
+          { id: 4, x: 3, y: 4, name: "深夜昏黃的檯燈", icon: "tea" }
+        ],
+        obstacles: [{ x: 0, y: 2 }, { x: 1, y: 2 }, { x: 3, y: 1 }, { x: 4, y: 3 }, { x: 2, y: 3 }, { x: 4, y: 4 }],
+        maxEnergy: 25,
+        memoryScroll: {
+          vignette: "那是個沒有即時通訊的年代。一張信紙要走過崇山峻嶺與顛簸鐵路，抵達案頭時邊角早已磨損。讀到某個只有彼此懂得的玩笑時，嘴角泛起的微笑，在微寒的深夜裡溫暖了一整個長冬。",
+          poem: [
+            "千里尺牘慢如舟，",
+            "墨痕深處話悲愁。",
+            "縱使天涯各一方，",
+            "燈前相視意悠悠。"
+          ],
+          author: "—— 二十二歲客居異鄉的冬夜"
+        }
+      },
+      {
+        id: 4,
+        title: "與摯愛告別的夕陽海岸",
+        subtitle: "「若時光在此刻停滯……」——金黃浪濤倒映著彼此相望的眼眸。",
+        gridSize: 7,
+        startPos: { x: 0, y: 3 },
+        lighthousePos: { x: 6, y: 3 },
+        fragments: [
+          { id: 1, x: 2, y: 1, name: "拾起的海玻璃", icon: "star" },
+          { id: 2, x: 3, y: 4, name: "潮水撫平的足跡", icon: "sunset" },
+          { id: 3, x: 5, y: 1, name: "金色落日的餘暉", icon: "sunset" },
+          { id: 4, x: 4, y: 5, name: "緊扣不捨的十指", icon: "hand" }
+        ],
+        obstacles: [{ x: 1, y: 2 }, { x: 1, y: 4 }, { x: 2, y: 3 }, { x: 4, y: 2 }, { x: 5, y: 3 }, { x: 3, y: 2 }, { x: 4, y: 4 }],
+        maxEnergy: 30,
+        memoryScroll: {
+          vignette: "海風吹亂了她的髮絲。海平線上的夕陽是一團熔金，把世界浸染成了深邃而柔和的蜜色。我們誰也沒有開口說再見，只是靜靜地看著最後一縷暮光沉沒。那份愛意沒有隨著時間消散，反而化成了迷宮裡永遠不滅的燈火。",
+          poem: [
+            "暮色沉沙海風清，",
+            "此去經年萬里行。",
+            "潮落潮生終有時，",
+            "心燈一點照殘生。"
+          ],
+          author: "—— 三十五歲南端海角黃昏"
+        }
+      },
+      {
+        id: 5,
+        title: "病榻前握緊的溫暖掌心",
+        subtitle: "「我在這裡，一直都在。」——心跳監視器滴答聲裡的執手相依。",
+        gridSize: 7,
+        startPos: { x: 3, y: 0 },
+        lighthousePos: { x: 3, y: 6 },
+        fragments: [
+          { id: 1, x: 1, y: 1, name: "微涼的指尖", icon: "hand" },
+          { id: 2, x: 5, y: 2, name: "床頭的白百合", icon: "tea" },
+          { id: 3, x: 1, y: 5, name: "平穩的心跳音律", icon: "star" },
+          { id: 4, x: 5, y: 5, name: "眼角滑落的淚光", icon: "star" }
+        ],
+        obstacles: [{ x: 2, y: 1 }, { x: 4, y: 1 }, { x: 3, y: 2 }, { x: 2, y: 4 }, { x: 4, y: 4 }, { x: 3, y: 5 }, { x: 0, y: 3 }, { x: 6, y: 3 }],
+        maxEnergy: 34,
+        memoryScroll: {
+          vignette: "夜深了，醫院的走廊寂靜無聲，窗外飄著細碎的雨絲。我坐在床沿，將那隻蒼白的手合在自己雙手之間，輕輕呼出熱氣。記憶的膠卷在此刻回放，從年輕時的牽手到白髮蒼蒼的相伴，生與死的邊界在此刻消融，唯愛永存。",
+          poem: [
+            "執手相看淚不言，",
+            "白頭如新五十年。",
+            "縱使光陰歸寂滅，",
+            "溫存猶在掌心連。"
+          ],
+          author: "—— 晚年長夜裡的深情凝視"
+        }
+      },
+      {
+        id: 6,
+        title: "漫天星火與釋然的微笑",
+        subtitle: "「記憶已圓滿，此行不虛。」——點亮最後的燈塔，走向安寧的永恆。",
+        gridSize: 8,
+        startPos: { x: 0, y: 7 },
+        lighthousePos: { x: 7, y: 0 },
+        fragments: [
+          { id: 1, x: 1, y: 5, name: "童年的風鈴", icon: "bicycle" },
+          { id: 2, x: 4, y: 6, name: "少年的紙翼", icon: "plane" },
+          { id: 3, x: 2, y: 2, name: "中年的尺牘", icon: "book" },
+          { id: 4, x: 6, y: 4, name: "暮年的晚霞", icon: "sunset" },
+          { id: 5, x: 4, y: 1, name: "永恆的信約", icon: "star" }
+        ],
+        obstacles: [{ x: 1, y: 6 }, { x: 2, y: 5 }, { x: 3, y: 5 }, { x: 2, y: 3 }, { x: 3, y: 2 }, { x: 5, y: 5 }, { x: 5, y: 3 }, { x: 6, y: 2 }, { x: 3, y: 7 }, { x: 6, y: 6 }],
+        maxEnergy: 40,
+        memoryScroll: {
+          vignette: "意識深處的迷宮突然被千萬盞晨曦般的光點溫柔點亮。不再有迷茫，不再有病痛。散落一生的歡笑、別離、淚水與承諾，在此刻如星座般無瑕交織。記憶燈塔緩緩升起，照亮了一片無垠而安寧的原野。靈魂輕盈如羽，含笑合十。",
+          poem: [
+            "迷宮踏盡復何求，",
+            "萬里星河一葉舟。",
+            "迴光返照皆圓滿，",
+            "微笑安然赴白頭。"
+          ],
+          author: "—— 記憶燈塔 · 永恆的迴響"
+        }
+      }
+    ];
+
+    // --- Web Audio Sound Synthesizer ---
+    class SoundSynthesizer {
+      constructor() {
+        this.ctx = null;
+        this.muted = false;
+        this.scale = [293.66, 329.63, 392.0, 440.0, 493.88, 587.33, 659.25, 783.99];
+      }
+
+      init() {
+        if (!this.ctx && typeof AudioContext !== 'undefined') {
+          this.ctx = new AudioContext();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      toggleMute() {
+        this.muted = !this.muted;
+        return this.muted;
+      }
+
+      playStep(step = 0) {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        const filter = this.ctx.createBiquadFilter();
+
+        const freq = this.scale[step % this.scale.length];
+        osc.frequency.setValueAtTime(freq, now);
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(1200, now);
+
+        gain.gain.setValueAtTime(0.001, now);
+        gain.gain.linearRampToValueAtTime(0.12, now + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.45);
+
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.5);
+      }
+
+      playFragment() {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+        const chords = [392.0, 493.88, 587.33];
+        chords.forEach((freq, i) => {
+          const now = this.ctx.currentTime + i * 0.1;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.frequency.setValueAtTime(freq, now);
+          gain.gain.setValueAtTime(0.001, now);
+          gain.gain.linearRampToValueAtTime(0.15, now + 0.03);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.8);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.9);
+        });
+      }
+
+      playVictory() {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+        const notes = [293.66, 440.0, 587.33, 783.99, 880.0];
+        notes.forEach((freq, i) => {
+          const now = this.ctx.currentTime + i * 0.14;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.frequency.setValueAtTime(freq, now);
+          gain.gain.setValueAtTime(0.001, now);
+          gain.gain.linearRampToValueAtTime(0.18, now + 0.05);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 2.5);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 2.6);
+        });
+      }
+
+      playBack() {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.frequency.setValueAtTime(320, now);
+        osc.frequency.exponentialRampToValueAtTime(220, now + 0.15);
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.2);
+      }
+    }
+
+    const audio = new SoundSynthesizer();
+
+    // --- State Engine ---
+    let currentLevelIndex = 0;
+    let path = [];
+    let collectedFragments = [];
+    let energyRemaining = 0;
+    let isCompleted = false;
+    let completedLevels = [];
+
+    // Pan & Zoom Engine State
+    let pan = { x: 0, y: 0 };
+    let zoom = 1.0;
+    let isPointerDown = false;
+    let dragStart = { x: 0, y: 0 };
+    let panStart = { x: 0, y: 0 };
+    let hasMoved = false;
+    let hoveredGrid = null;
+
+    // DOM Elements
+    const mainMenuView = document.getElementById('main-menu-view');
+    const playingView = document.getElementById('playing-view');
+    const gameContainer = document.getElementById('game-container');
+    const canvas = document.getElementById('game-canvas');
+    const ctx = canvas.getContext('2d');
+
+    const hudChapter = document.getElementById('hud-chapter');
+    const hudEnergy = document.getElementById('hud-energy');
+    const hudFragments = document.getElementById('hud-fragments');
+    const chronicleTitle = document.getElementById('chronicle-title');
+    const chronicleQuote = document.getElementById('chronicle-quote');
+    const zoomLevelText = document.getElementById('zoom-level');
+
+    // Modals
+    const modalVictory = document.getElementById('modal-victory');
+    const modalLevels = document.getElementById('modal-levels');
+    const modalIntro = document.getElementById('modal-intro');
+    const levelList = document.getElementById('level-list');
+    const vicFooter = document.getElementById('vic-footer');
+
+    // Switch between Main Menu and Playing screens
+    function showScreen(screen) {
+      if (screen === 'MAIN_MENU') {
+        mainMenuView.classList.remove('hidden');
+        playingView.classList.add('hidden');
+        modalVictory.classList.remove('active');
+      } else {
+        mainMenuView.classList.add('hidden');
+        playingView.classList.remove('hidden');
+        resizeCanvas();
+        centerMazeView(false);
+      }
+    }
+
+    function loadLevel(index) {
+      currentLevelIndex = index;
+      const lvl = LEVELS[currentLevelIndex];
+      path = [{ ...lvl.startPos }];
+      collectedFragments = [];
+      energyRemaining = lvl.maxEnergy;
+      isCompleted = false;
+
+      updateHUD();
+      resizeCanvas();
+      centerMazeView(false);
+    }
+
+    function updateZoomDisplay() {
+      zoomLevelText.textContent = Math.round(zoom * 100) + '%';
+    }
+
+    function applyZoom(newZoom, anchorX, anchorY) {
+      const clampedZoom = Math.max(0.4, Math.min(3.0, newZoom));
+      const scaleRatio = clampedZoom / zoom;
+      pan.x = anchorX - (anchorX - pan.x) * scaleRatio;
+      pan.y = anchorY - (anchorY - pan.y) * scaleRatio;
+      zoom = clampedZoom;
+      updateZoomDisplay();
+    }
+
+    function updateHUD() {
+      const lvl = LEVELS[currentLevelIndex];
+      hudChapter.textContent = (currentLevelIndex + 1) + ' / ' + LEVELS.length;
+      hudEnergy.textContent = energyRemaining;
+      hudFragments.textContent = collectedFragments.length + ' / ' + lvl.fragments.length;
+      chronicleTitle.textContent = lvl.title;
+      chronicleQuote.textContent = lvl.subtitle;
+    }
+
+    function checkMove(target) {
+      if (isCompleted || energyRemaining <= 0) return;
+      const lvl = LEVELS[currentLevelIndex];
+
+      // Check obstacle
+      if (lvl.obstacles.some(o => o.x === target.x && o.y === target.y)) return;
+
+      const last = path[path.length - 1];
+      if (last.x === target.x && last.y === target.y) return;
+
+      // Undo check
+      if (path.length > 1) {
+        const prev = path[path.length - 2];
+        if (prev.x === target.x && prev.y === target.y) {
+          undoStep();
+          return;
+        }
+      }
+
+      // Adjacency check
+      const dist = Math.abs(last.x - target.x) + Math.abs(last.y - target.y);
+      if (dist === 1) {
+        path.push({ ...target });
+        energyRemaining--;
+        audio.playStep(path.length);
+
+        // Check fragment
+        const frag = lvl.fragments.find(f => f.x === target.x && f.y === target.y);
+        if (frag && !collectedFragments.includes(frag.id)) {
+          collectedFragments.push(frag.id);
+          audio.playFragment();
+        }
+
+        // Check Lighthouse victory
+        if (
+          target.x === lvl.lighthousePos.x &&
+          target.y === lvl.lighthousePos.y &&
+          collectedFragments.length === lvl.fragments.length
+        ) {
+          isCompleted = true;
+          if (!completedLevels.includes(lvl.id)) completedLevels.push(lvl.id);
+          audio.playVictory();
+          showVictory();
+        }
+
+        updateHUD();
+      }
+    }
+
+    function undoStep() {
+      if (path.length <= 1) return;
+      const popped = path.pop();
+      energyRemaining++;
+      audio.playBack();
+
+      const lvl = LEVELS[currentLevelIndex];
+      const frag = lvl.fragments.find(f => f.x === popped.x && f.y === popped.y);
+      if (frag) {
+        collectedFragments = collectedFragments.filter(id => id !== frag.id);
+      }
+      updateHUD();
+    }
+
+    function showVictory() {
+      const lvl = LEVELS[currentLevelIndex];
+      const isFinal = currentLevelIndex === LEVELS.length - 1;
+
+      document.getElementById('vic-title').textContent = isFinal ? '終章圓滿 · 漫天星火' : '記憶重現 · 迴光返照';
+      document.getElementById('vic-vignette').textContent = lvl.memoryScroll.vignette;
+      const poemBox = document.getElementById('vic-poem');
+      poemBox.innerHTML = lvl.memoryScroll.poem.map(l => '<div class="poem-line">' + l + '</div>').join('');
+      document.getElementById('vic-author').textContent = lvl.memoryScroll.author;
+
+      // When finishing all 6 chapters: Show 返回主介面 and 重新遊戲
+      if (isFinal) {
+        vicFooter.innerHTML = `
+          <button id="btn-vic-menu" class="btn btn-primary">🏠 返回主介面</button>
+          <button id="btn-vic-restart" class="btn">↺ 重新遊戲</button>
+          <button id="btn-replay" class="btn" style="background:transparent;">重溫此章</button>
+        `;
+        document.getElementById('btn-vic-menu').addEventListener('click', () => showScreen('MAIN_MENU'));
+        document.getElementById('btn-vic-restart').addEventListener('click', () => {
+          completedLevels = [];
+          loadLevel(0);
+          modalVictory.classList.remove('active');
+        });
+        document.getElementById('btn-replay').addEventListener('click', () => {
+          modalVictory.classList.remove('active');
+          loadLevel(currentLevelIndex);
+        });
+      } else {
+        vicFooter.innerHTML = `
+          <button id="btn-replay" class="btn">重溫此章</button>
+          <button id="btn-next" class="btn btn-primary">奔赴下一章節 ▶</button>
+        `;
+        document.getElementById('btn-replay').addEventListener('click', () => {
+          modalVictory.classList.remove('active');
+          loadLevel(currentLevelIndex);
+        });
+        document.getElementById('btn-next').addEventListener('click', () => {
+          modalVictory.classList.remove('active');
+          loadLevel((currentLevelIndex + 1) % LEVELS.length);
+        });
+      }
+
+      setTimeout(() => modalVictory.classList.add('active'), 600);
+    }
+
+    // --- Isometric Drawing Math with Pan & Zoom ---
+    function getMetrics() {
+      const lvl = LEVELS[currentLevelIndex];
+      const width = canvas.width / (window.devicePixelRatio || 1) || 800;
+      const height = canvas.height / (window.devicePixelRatio || 1) || 600;
+      const tileW = Math.max(48, Math.min(84, (Math.min(width, height * 1.3) / (lvl.gridSize + 2.5))));
+      const tileH = tileW * 0.5;
+      return {
+        tileW,
+        tileH,
+        tileDepth: tileH * 0.38,
+        originX: width / 2,
+        originY: height / 2 - ((lvl.gridSize - 1) * tileH) / 2
+      };
+    }
+
+    function gridToWorld(gx, gy) {
+      const m = getMetrics();
+      return {
+        x: m.originX + (gx - gy) * (m.tileW / 2),
+        y: m.originY + (gx + gy) * (m.tileH / 2)
+      };
+    }
+
+    function screenToGrid(sx, sy) {
+      const worldX = (sx - pan.x) / zoom;
+      const worldY = (sy - pan.y) / zoom;
+
+      const m = getMetrics();
+      const dx = worldX - m.originX;
+      const dy = worldY - m.originY;
+      const hw = m.tileW / 2;
+      const hh = m.tileH / 2;
+      const gx = Math.round((dx / hw + dy / hh) / 2);
+      const gy = Math.round((dy / hh - dx / hw) / 2);
+      const lvl = LEVELS[currentLevelIndex];
+      if (gx >= 0 && gx < lvl.gridSize && gy >= 0 && gy < lvl.gridSize) {
+        return { x: gx, y: gy };
+      }
+      return null;
+    }
+
+    function getMazeBounds() {
+      const m = getMetrics();
+      const lvl = LEVELS[currentLevelIndex];
+      const N = lvl.gridSize;
+      const halfW = m.tileW / 2;
+      const halfH = m.tileH / 2;
+      const minX = m.originX - N * halfW;
+      const maxX = m.originX + N * halfW;
+      const minY = m.originY - halfH - 30;
+      const maxY = m.originY + 2 * (N - 1) * halfH + halfH + m.tileDepth;
+      return {
+        width: maxX - minX,
+        height: maxY - minY,
+        centerX: m.originX,
+        centerY: (minY + maxY) / 2
+      };
+    }
+
+    function centerMazeView(smooth = false) {
+      const dpr = window.devicePixelRatio || 1;
+      const w = canvas.width / dpr || window.innerWidth || 800;
+      const h = canvas.height / dpr || (window.innerHeight - 56) || 600;
+      const bounds = getMazeBounds();
+      const fitZoom = Math.min((w * 0.88) / Math.max(100, bounds.width), (h * 0.82) / Math.max(100, bounds.height));
+      const targetZoom = Math.max(0.65, Math.min(1.2, fitZoom));
+      const targetPanX = w / 2 - bounds.centerX * targetZoom;
+      const targetPanY = h / 2 - bounds.centerY * targetZoom;
+
+      if (!smooth) {
+        pan = { x: targetPanX, y: targetPanY };
+        zoom = targetZoom;
+        updateZoomDisplay();
+      } else {
+        const startPan = { ...pan };
+        const startZoom = zoom;
+        const startTime = performance.now();
+        const duration = 350;
+
+        function animate(now) {
+          const progress = Math.min(1, (now - startTime) / duration);
+          const ease = 1 - Math.pow(1 - progress, 3);
+          pan.x = startPan.x + (targetPanX - startPan.x) * ease;
+          pan.y = startPan.y + (targetPanY - startPan.y) * ease;
+          zoom = startZoom + (targetZoom - startZoom) * ease;
+          updateZoomDisplay();
+          if (progress < 1) requestAnimationFrame(animate);
+        }
+        requestAnimationFrame(animate);
+      }
+    }
+
+    function resizeCanvas() {
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      const w = rect.width || window.innerWidth || 800;
+      const h = rect.height || (window.innerHeight - 56) || 600;
+      canvas.width = w * dpr;
+      canvas.height = h * dpr;
+    }
+
+    // Animation & Render Loop
+    let animTime = 0;
+    function render() {
+      animTime += 0.025;
+      const dpr = window.devicePixelRatio || 1;
+      const width = canvas.width / dpr || 800;
+      const height = canvas.height / dpr || 600;
+      const m = getMetrics();
+      const halfW = m.tileW / 2;
+      const halfH = m.tileH / 2;
+      const lvl = LEVELS[currentLevelIndex];
+
+      ctx.save();
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, width, height);
+
+      // Background Radial Aura (screen space)
+      const bgGlow = ctx.createRadialGradient(width / 2, height * 0.45, 10, width / 2, height * 0.45, Math.max(width, height) * 0.7);
+      bgGlow.addColorStop(0, isCompleted ? 'rgba(243, 213, 160, 0.18)' : 'rgba(243, 213, 160, 0.04)');
+      bgGlow.addColorStop(1, 'rgba(18, 22, 26, 0)');
+      ctx.fillStyle = bgGlow;
+      ctx.fillRect(0, 0, width, height);
+
+      // Apply Camera Pan and Zoom
+      ctx.save();
+      ctx.translate(pan.x, pan.y);
+      ctx.scale(zoom, zoom);
+
+      // Draw Tiles Back to Front
+      for (let sum = 0; sum <= (lvl.gridSize - 1) * 2; sum++) {
+        for (let x = 0; x < lvl.gridSize; x++) {
+          const y = sum - x;
+          if (y < 0 || y >= lvl.gridSize) continue;
+
+          const worldPos = gridToWorld(x, y);
+          const isObs = lvl.obstacles.some(o => o.x === x && o.y === y);
+          const isPath = path.some(p => p.x === x && p.y === y);
+          const isLighthouse = lvl.lighthousePos.x === x && lvl.lighthousePos.y === y;
+          const frag = lvl.fragments.find(f => f.x === x && f.y === y);
+          const isFragCollected = frag && collectedFragments.includes(frag.id);
+          const isHover = hoveredGrid && hoveredGrid.x === x && hoveredGrid.y === y;
+
+          if (isObs) {
+            ctx.save();
+            ctx.translate(worldPos.x, worldPos.y + 4);
+            ctx.beginPath();
+            ctx.moveTo(0, -halfH * 0.85);
+            ctx.lineTo(halfW * 0.85, 0);
+            ctx.lineTo(0, halfH * 0.85);
+            ctx.lineTo(-halfW * 0.85, 0);
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(13, 16, 20, 0.65)';
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(34, 42, 53, 0.4)';
+            ctx.stroke();
+            ctx.restore();
+            continue;
+          }
+
+          // Tile Pedestal
+          ctx.save();
+          ctx.translate(worldPos.x, worldPos.y);
+
+          // Left bevel
+          ctx.beginPath();
+          ctx.moveTo(-halfW, 0);
+          ctx.lineTo(0, halfH);
+          ctx.lineTo(0, halfH + m.tileDepth);
+          ctx.lineTo(-halfW, m.tileDepth);
+          ctx.closePath();
+          ctx.fillStyle = isPath ? 'rgba(38, 48, 62, 0.85)' : 'rgba(24, 30, 38, 0.8)';
+          ctx.fill();
+          ctx.strokeStyle = 'rgba(34, 42, 53, 0.4)';
+          ctx.stroke();
+
+          // Right bevel
+          ctx.beginPath();
+          ctx.moveTo(0, halfH);
+          ctx.lineTo(halfW, 0);
+          ctx.lineTo(halfW, m.tileDepth);
+          ctx.lineTo(0, halfH + m.tileDepth);
+          ctx.closePath();
+          ctx.fillStyle = isPath ? 'rgba(30, 38, 50, 0.9)' : 'rgba(18, 23, 30, 0.85)';
+          ctx.fill();
+          ctx.strokeStyle = 'rgba(34, 42, 53, 0.4)';
+          ctx.stroke();
+
+          // Top diamond face
+          ctx.beginPath();
+          ctx.moveTo(0, -halfH);
+          ctx.lineTo(halfW, 0);
+          ctx.lineTo(0, halfH);
+          ctx.lineTo(-halfW, 0);
+          ctx.closePath();
+          ctx.fillStyle = isPath ? 'rgba(243, 213, 160, 0.28)' : isHover ? 'rgba(40, 50, 64, 0.85)' : 'rgba(34, 42, 53, 0.72)';
+          ctx.fill();
+          ctx.strokeStyle = isPath ? 'rgba(243, 213, 160, 0.55)' : isHover ? 'rgba(243, 213, 160, 0.35)' : 'rgba(243, 213, 160, 0.12)';
+          ctx.lineWidth = isPath ? 1.4 : 0.8;
+          ctx.stroke();
+
+          // Fragment Relic
+          if (frag) {
+            const fy = -10 + Math.sin(animTime * 2 + frag.id) * 3;
+            ctx.beginPath();
+            ctx.arc(0, fy, 16, 0, Math.PI * 2);
+            ctx.fillStyle = isFragCollected ? 'rgba(243, 213, 160, 0.35)' : 'rgba(243, 213, 160, 0.15)';
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.arc(0, fy, 4, 0, Math.PI * 2);
+            ctx.fillStyle = '#FFF9EE';
+            ctx.fill();
+          }
+
+          // Lighthouse
+          if (isLighthouse) {
+            if (isCompleted || collectedFragments.length === lvl.fragments.length) {
+              const beam = ctx.createLinearGradient(0, -18, 0, -130);
+              beam.addColorStop(0, 'rgba(243, 213, 160, 0.4)');
+              beam.addColorStop(1, 'rgba(243, 213, 160, 0)');
+              ctx.beginPath();
+              ctx.moveTo(-10, -20);
+              ctx.lineTo(-30, -130);
+              ctx.lineTo(30, -130);
+              ctx.lineTo(10, -20);
+              ctx.closePath();
+              ctx.fillStyle = beam;
+              ctx.fill();
+            }
+
+            ctx.beginPath();
+            ctx.rect(-8, -16, 16, 10);
+            ctx.fillStyle = isCompleted ? '#F3D5A0' : 'rgba(243, 213, 160, 0.35)';
+            ctx.fill();
+            ctx.strokeStyle = '#FFF9EE';
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(0, -24);
+            ctx.lineTo(10, -16);
+            ctx.lineTo(-10, -16);
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(24, 30, 38, 0.98)';
+            ctx.fill();
+            ctx.strokeStyle = '#F3D5A0';
+            ctx.stroke();
+          }
+
+          ctx.restore();
+        }
+      }
+
+      // Draw Path Thread
+      if (path.length > 1) {
+        ctx.save();
+        ctx.beginPath();
+        path.forEach((pt, i) => {
+          const worldPos = gridToWorld(pt.x, pt.y);
+          if (i === 0) ctx.moveTo(worldPos.x, worldPos.y);
+          else ctx.lineTo(worldPos.x, worldPos.y);
+        });
+        ctx.strokeStyle = 'rgba(243, 213, 160, 0.35)';
+        ctx.lineWidth = 6;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.stroke();
+
+        ctx.strokeStyle = '#F3D5A0';
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // Draw Guiding Light (Player)
+      const last = path[path.length - 1];
+      if (last) {
+        const head = gridToWorld(last.x, last.y);
+        ctx.save();
+        ctx.translate(head.x, head.y);
+        const br = Math.sin(animTime * 3) * 2;
+        ctx.beginPath();
+        ctx.arc(0, -6, 18 + br, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(243, 213, 160, 0.3)';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(0, -6, 6, 0, Math.PI * 2);
+        ctx.fillStyle = '#FFF9EE';
+        ctx.fill();
+        ctx.restore();
+      }
+
+      ctx.restore();
+      ctx.restore();
+      requestAnimationFrame(render);
+    }
+
+    // --- Mouse Drag to Pan & Wheel to Zoom Events ---
+    canvas.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+      const factor = e.deltaY < 0 ? 1.12 : 0.89;
+      applyZoom(zoom * factor, mouseX, mouseY);
+    }, { passive: false });
+
+    canvas.addEventListener('pointerdown', (e) => {
+      if (e.button === 0 || e.pointerType === 'touch') {
+        isPointerDown = true;
+        dragStart = { x: e.clientX, y: e.clientY };
+        panStart = { x: pan.x, y: pan.y };
+        hasMoved = false;
+        canvas.setPointerCapture(e.pointerId);
+      }
+    });
+
+    canvas.addEventListener('pointermove', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const screenX = e.clientX - rect.left;
+      const screenY = e.clientY - rect.top;
+
+      if (isPointerDown) {
+        const dx = e.clientX - dragStart.x;
+        const dy = e.clientY - dragStart.y;
+        if (dx * dx + dy * dy > 20) {
+          hasMoved = true;
+          pan.x = panStart.x + dx;
+          pan.y = panStart.y + dy;
+          gameContainer.classList.add('dragging');
+        }
+      }
+
+      hoveredGrid = screenToGrid(screenX, screenY);
+    });
+
+    const handlePointerEnd = (e) => {
+      if (canvas.hasPointerCapture(e.pointerId)) {
+        canvas.releasePointerCapture(e.pointerId);
+      }
+
+      if (isPointerDown && !hasMoved) {
+        const rect = canvas.getBoundingClientRect();
+        const g = screenToGrid(e.clientX - rect.left, e.clientY - rect.top);
+        if (g) checkMove(g);
+      }
+
+      isPointerDown = false;
+      hasMoved = false;
+      gameContainer.classList.remove('dragging');
+    };
+
+    canvas.addEventListener('pointerup', handlePointerEnd);
+    canvas.addEventListener('pointercancel', handlePointerEnd);
+
+    // Zoom Buttons
+    document.getElementById('btn-zoom-in').addEventListener('click', () => {
+      const cx = canvas.clientWidth / 2;
+      const cy = canvas.clientHeight / 2;
+      applyZoom(zoom * 1.2, cx, cy);
+    });
+
+    document.getElementById('btn-zoom-out').addEventListener('click', () => {
+      const cx = canvas.clientWidth / 2;
+      const cy = canvas.clientHeight / 2;
+      applyZoom(zoom / 1.2, cx, cy);
+    });
+
+    document.getElementById('btn-zoom-reset').addEventListener('click', () => {
+      centerMazeView(true);
+    });
+
+    // Keyboard support
+    window.addEventListener('keydown', (e) => {
+      const last = path[path.length - 1];
+      if (!last || isCompleted) return;
+      let target = null;
+      if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') target = { x: last.x, y: last.y - 1 };
+      if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') target = { x: last.x, y: last.y + 1 };
+      if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') target = { x: last.x - 1, y: last.y };
+      if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') target = { x: last.x + 1, y: last.y };
+      if (target) checkMove(target);
+      if ((e.key === 'z' || e.key === 'Z') && (e.ctrlKey || e.metaKey)) undoStep();
+    });
+
+    document.getElementById('btn-undo').addEventListener('click', undoStep);
+    document.getElementById('btn-reset').addEventListener('click', () => loadLevel(currentLevelIndex));
+
+    // Sound Toggles
+    const toggleSoundFn = () => {
+      const isMuted = audio.toggleMute();
+      const txt = isMuted ? '🔇 聲音：關' : '🔊 聲音：開';
+      document.getElementById('btn-sound-menu').textContent = txt;
+      document.getElementById('btn-sound-play').textContent = txt;
+    };
+    document.getElementById('btn-sound-menu').addEventListener('click', toggleSoundFn);
+    document.getElementById('btn-sound-play').addEventListener('click', toggleSoundFn);
+
+    // Header Back to Home
+    document.getElementById('btn-header-home').addEventListener('click', () => showScreen('MAIN_MENU'));
+
+    // Main Menu 3 Actions
+    document.getElementById('btn-menu-start').addEventListener('click', () => {
+      audio.init();
+      audio.playStep(0);
+      showScreen('PLAYING');
+    });
+
+    document.getElementById('btn-menu-story').addEventListener('click', () => modalIntro.classList.add('active'));
+    document.getElementById('btn-story').addEventListener('click', () => modalIntro.classList.add('active'));
+    document.getElementById('btn-close-intro').addEventListener('click', () => modalIntro.classList.remove('active'));
+
+    const openLevelModal = () => {
+      levelList.innerHTML = LEVELS.map((lvl, idx) => `
+        <div class="level-card ${idx === currentLevelIndex ? 'active' : ''}" onclick="selectLevel(${idx})">
+          <div style="font-size:0.75rem; color:rgba(243,213,160,0.6);">第 ${idx + 1} 章 · ${lvl.gridSize}×${lvl.gridSize}</div>
+          <div style="font-weight:600; margin-top:4px; font-size:0.9rem;">${lvl.title}</div>
+        </div>
+      `).join('');
+      modalLevels.classList.add('active');
+    };
+
+    document.getElementById('btn-menu-levels').addEventListener('click', openLevelModal);
+    document.getElementById('btn-levels').addEventListener('click', openLevelModal);
+    document.getElementById('btn-close-levels').addEventListener('click', () => modalLevels.classList.remove('active'));
+
+    window.selectLevel = (idx) => {
+      modalLevels.classList.remove('active');
+      loadLevel(idx);
+      showScreen('PLAYING');
+    };
+
+    window.addEventListener('resize', () => {
+      resizeCanvas();
+      centerMazeView(false);
+    });
+
+    // Initial Start: Display Main Menu
+    resizeCanvas();
+    loadLevel(0);
+    showScreen('MAIN_MENU');
+    render();
+  </script>
+</body>
+</html>
